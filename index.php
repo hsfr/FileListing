@@ -1,4 +1,4 @@
-<?php
+	<?php
   
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -13,11 +13,11 @@
 	  function getFileList( $inFolder, $depth, $inPattern )
 	  {
 	      // Get list of folders
-          // echo "getFileList( \"{$inFolder}\" )\n";
+          //echo "getFileList( \"{$inFolder}\" )\n";
 	      $folderList = scandir( $inFolder );
 	      $fileArray = array();
 
-		  if ( isBlockingFilePresent( $inFolder, $inPattern ) ) {
+		  if ( isMatchingFileInFolder( $inFolder, $inPattern ) ) {
              // HTML file in this folder so scan this folder for HTML files and exit
              // Scan round list of files and insert into array keyed by name (not time code).
 			 echo "<div class=\"list\" data-level=\"{$depth}\">\n";
@@ -25,7 +25,10 @@
                 if ( !isHiddenFile( $file ) ) {
             		$fullName = "{$inFolder}/{$file}";
                     // $lastModified = date( "F d Y, H:i", filemtime( $fullName ) );
-                    $fileArray[ $file ] = filemtime( $fullName );
+                    if ( !is_dir( $fullName ) ) {
+	                    $fileArray[ $file ] = filemtime( $fullName );
+	                }
+                    
              	}
              }
              arsort( $fileArray );
@@ -41,13 +44,16 @@
              // Produce an array of the folders to traverse with their time stamps
 			 foreach ( $folderList as $key => $folder ) {
                 if ( !isHiddenFile( $folder ) ) {
-                    $fullName = "{$inFolder}{$folder}";
+                    $fullName = "{$inFolder}/{$folder}";
+                   //  echo "fullname:{$fullName}<br/>";
     		        if ( is_dir( $fullName ) ) {
+	    		       
     				   // Get the time stamp based on youngest contained file. This reflects
     				   // the youngest time stamp of the contained folders/files
     				   $containedTimeStamp = getYoungestFolderTimeCode( $fullName, $inPattern );
     				   // Use this in the array of folders
-                       $fileArray[ $folder ] = $containedTimeStamp;
+                 // echo "   found file [{$folder}] - " . date( "F d Y, H:i", $containedTimeStamp ) . "\n";
+                  $fileArray[ $folder ] = $containedTimeStamp;
     		        }
                 }
 			 }
@@ -55,8 +61,9 @@
              arsort( $fileArray );
              // Now traverse this recursing if necessary
 			 foreach ( $fileArray as $folder => $timeStamp ) {
-        		$fullName = "{$inFolder}{$folder}";
-                echo "<div class=\"folder\" data-folder=\"{$depth}\">\n";
+        		$fullName = "{$inFolder}/{$folder}";
+                $formatedTimeStamp = date( "F d Y, H:i", $timeStamp );
+                echo "<div class=\"folder\" data-folder=\"{$depth}\" data-time=\"{$timeStamp}\">\n";
                 echo "<h{$depth} class=\"folderTitle\">{$folder}</h{$depth}>\n";
 				getFileList( $fullName, $depth + 1, $inPattern );
 		        echo "</div>\n";	
@@ -77,7 +84,7 @@
  
    function isHiddenFile( $inFile )
    {
-      return preg_match( "/^\./", $inFile );
+      return preg_match( "/^(\.)|(_)/", $inFile );
    }
 
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -90,7 +97,7 @@
     * @retval true if found.
     */
  
-   function isBlockingFilePresent( $inFolder, $inPattern )
+   function isMatchingFileInFolder( $inFolder, $inPattern )
    {
        $fileListing = scandir( $inFolder );
        foreach ( $fileListing as $key => $value ) {
@@ -120,7 +127,7 @@
       $dirListing = scandir( $inFolder );
       // fileListing is now a list of files/folders. We need to check for
       // HTML files stop any further processing
-      if ( isBlockingFilePresent( $inFolder, $inPattern ) ) {
+      if ( isMatchingFileInFolder( $inFolder, $inPattern ) ) {
          // Stop processing here but scan html files for the most recent.
          return getYoungestFileTimeCode( $inFolder, $inPattern );
       } else {
@@ -128,7 +135,7 @@
          foreach ( $dirListing as $key => $folder ) {
             // Ignore hidden files/folders
             if ( !isHiddenFile( $folder ) ) {
-               $fullName = "{$inFolder}{$folder}";
+               $fullName = "{$inFolder}/{$folder}";
                if ( is_dir( $fullName ) ) {
                   // Get the time code of this folder without contents
                   $thisTimeCode = filemtime( $fullName );
@@ -171,7 +178,7 @@
                if ( $thisTimeCode > $maxTimeCode ) {
                   $maxTimeCode = $thisTimeCode;
                }
-               // echo "   found file [{$file}] - " . date( "F d Y, H:i", $thisTimeCode ) . "\n";
+                // echo "   found file [{$file}] - " . date( "F d Y, H:i", $thisTimeCode ) . "\n";
             }
          }
       }
@@ -179,9 +186,10 @@
    }
 
     date_default_timezone_set('Europe/London');
-    $youngestFileTime = getYoungestFolderTimeCode( "project/", "/\.html$/" );
+    // $youngestFileTime = getYoungestFolderTimeCode( "project/", "/\.html$/" );
     // echo " Youngest file - " . date( "F d Y, H:i", $youngestFileTime ) . "\n\n\n";
     
-    echo getFileList( "project/", 1, "/\.html$/" );
+     getFileList( "projects/", 1, "/\.html$/" );
            
 ?>
+	
