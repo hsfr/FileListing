@@ -27,41 +27,37 @@
                     $fileArray[ $file ] = filemtime( $fullName );
              	}
              }
-    // Now output contents of array with HTML tags
-         // First sort on value (modified time)
-         arsort( $fileArray );
-         foreach ( $fileArray as $file => $timeStamp ) {
-             $formatedTimeStamp = date( "F d Y, H:i", $timeStamp );
-            echo str_repeat( " ", $depth * 3 ) . "{$file} : {$formatedTimeStamp}\n";
-         }
+             arsort( $fileArray );
+             foreach ( $fileArray as $file => $timeStamp ) {
+                 $fullName = "{$inFolder}/{$file}";
+                 $formatedTimeStamp = date( "F d Y, H:i", $timeStamp );
+                 echo "<div class=\"item\"><a href=\"{$fullName}\" target=\"_blank\">{$file}</a> <span class=\"date\">{$formatedTimeStamp}</span> </div>\n";
+             }
          } else {
 	         // No html files so scan this folder and recurse to next level if folder found
+             // Produce an array of the folders to traverse with their time stamps
 			 foreach ( $folderList as $key => $folder ) {
                 if ( !isHiddenFile( $folder ) ) {
-            		$fullName = "{$inFolder}{$folder}";
-                    echo "{$fullName}\"\n";
-					if ( is_dir( $fullName ) ) {
-					    // Get the time stamp based on youngest contained file. This reflects
-					    // the youngest time stamp of the contained folders/files
-				        $containedTimeStamp = getYoungestFolderTimeCode( $fullName, $inPattern );
-				        // Use this in the array of folders
-                        $fileArray[ $folder ] = $containedTimeStamp;
-						// Now we can recurse into this folder
-						getFileList( $fullName, $depth + 1, $inPattern );
-					}
+                    $fullName = "{$inFolder}{$folder}";
+    		        if ( is_dir( $fullName ) ) {
+    				   // Get the time stamp based on youngest contained file. This reflects
+    				   // the youngest time stamp of the contained folders/files
+    				   $containedTimeStamp = getYoungestFolderTimeCode( $fullName, $inPattern );
+    				   // Use this in the array of folders
+                       $fileArray[ $folder ] = $containedTimeStamp;
+    		        }
                 }
 			 }
-			          // Now output contents of array with HTML tags
-         // First sort on value (modified time)
-         arsort( $fileArray );
-         foreach ( $fileArray as $file => $timeStamp ) {
-             $formatedTimeStamp = date( "F d Y, H:i", $timeStamp );
-            echo str_repeat( " ", $depth * 3 ) . "{$file} : {$formatedTimeStamp}\n";
-         }
+			 // At this point we have an array of folders with their time stamps so sort
+             arsort( $fileArray );
+             // Now traverse this recursing if necessary
+			 foreach ( $fileArray as $folder => $timeStamp ) {
+        		$fullName = "{$inFolder}{$folder}";
+                echo "{$fullName}\"\n";
+				getFileList( $fullName, $depth + 1, $inPattern );
+			 }
 
           }
-
-     
       }
 
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
