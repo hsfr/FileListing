@@ -1,0 +1,53 @@
+@font-face {
+font-family: "Calibre-Semibold";
+	src: url("Calibre-Semibold.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+font-family: "Calibre-Medium";
+	src: url("Calibre-Medium.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+font-family: "Calibre-Regular";
+	src: url("Calibre-Regular.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+font-family: "Calibre-RegularItalic";
+	src: url("Calibre-RegularItalic.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
+}
+
+/* Not Used */
+
+/*
+
+@font-face {
+font-family: "Calibre-Bold";
+	src: url("Calibre-Bold.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
+}
+
+
+@font-face {
+font-family: "Calibre-Light";
+	src: url("Calibre-Light.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+font-family: "Calibre-Thin";
+	src: url("Calibre-Thin.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
+}
+
+*/

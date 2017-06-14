@@ -1,0 +1,19 @@
+/*	Created by
+	Ian Field-Richards
+	(zilla774)
+	2014
+*/
+
+@font-face {
+  font-family: 'dA-logo';
+  src: url('dA-logo.eot'); /* IE9 Compat Modes */
+  src: url('dA-logo.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('dA-logo.woff') format('woff'), /* Modern Browsers */
+       url('dA-logo.ttf')  format('truetype'), /* Safari, Android, iOS */
+       url('dA-logo.svg#b5a0c4fa829b4b288290e9b358bc5197') format('svg'); /* Legacy iOS */
+       
+  font-style:   normal;
+  font-weight:  400;
+  
+}
+
