@@ -68,6 +68,55 @@
 
           }
       }
+      
+   //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+   //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+   /**
+    * Recursive function to display (HTML) a list of files in alpha order.
+    *
+    * @param inFolder the base folder to display folders/files.
+    * @param inPattern the filter for selecting files (defaults to html files).
+    * @param inDepth the depth of search (only used internally).
+    */
+
+ 	  function displayAlphaFilesList( $inFolder, $inPattern = "/\.html$/", $depth = 1 )
+	  {
+	    $dirListing = scandir( $inFolder );
+	
+		if ( isMatchingFileInFolder( $inFolder, $inPattern ) ) {
+			// HTML file in this folder so scan this folder for HTML files and exit
+			echo "<div class=\"list\" data-level=\"{$depth}\">";
+	       	foreach ( $dirListing as $key => $file ) {
+		       	// If file name ends with html then output file name
+                if ( !isHiddenFile( $file ) ) {
+					$fullName = "{$inFolder}/{$file}";
+				    if ( preg_match( $inPattern, $file ) ) {
+		 		      // echo file name
+		 		      $lastModified = date( "F d Y, H:i", filemtime( $fullName ) );
+		 			  echo "<div class=\"item\"><a href=\"{$fullName}\" target=\"_blank\">{$value}</a> <span class=\"date\">{$lastModified}</span> </div>\n";
+		 			}
+	 			}
+			}
+			echo "</div>";
+			return;
+		} else {
+			// No matching files so scan this folder and recurse to next level if folder found
+			foreach ( $dirListing as $key => $folder ) {
+		        if ( !preg_match("/^\./", $folder ) ) {
+					$fullName = "{$inFolder}/{$folder}";
+			        echo "<div class=\"folder\" data-folder=\"{$depth}\">";
+					if ( is_dir( $fullName ) ) {
+						// output a new heading at this level
+						echo "<h{$depth} class=\"folderTitle\">{$folder}</h{$depth}>\n";
+						// Recurse into this folder
+						displayAlphaFilesList( $fullName, $inPattern, $depth + 1 );
+					}
+					echo "</div>";	
+				}
+			}
+		}
+	  }
+
 
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -182,6 +231,7 @@
 
     date_default_timezone_set('Europe/London');
     displayRecentFilesList( "projects/" );
+    displayAlphaFilesList( "projects/" );
            
 ?>
 	
