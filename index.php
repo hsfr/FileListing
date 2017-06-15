@@ -3,24 +3,24 @@
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
    /**
-    * Recursive function to check whether a particular file is present.
+    * Recursive function to display (HTML) a list of files with most recent
+    * at the top.
     *
-    * @param inFolder the base folder to search for files.
-    * @param inPattern the filter for selecting files.
-    * @retval true if found.
+    * @param inFolder the base folder to display folders/files.
+    * @param inPattern the filter for selecting files (defaults to html files).
+    * @param inDepth the depth of search (only used internally).
     */
  
-	  function getFileList( $inFolder, $depth, $inPattern )
+	  function displayRecentFilesList( $inFolder, $inPattern = "/\.html$/", $inDepth = 1 )
 	  {
 	      // Get list of folders
-          //echo "getFileList( \"{$inFolder}\" )\n";
 	      $folderList = scandir( $inFolder );
 	      $fileArray = array();
 
 		  if ( isMatchingFileInFolder( $inFolder, $inPattern ) ) {
              // HTML file in this folder so scan this folder for HTML files and exit
              // Scan round list of files and insert into array keyed by name (not time code).
-			 echo "<div class=\"list\" data-level=\"{$depth}\">\n";
+			 echo "<div class=\"list\" data-level=\"{$inDepth}\">\n";
              foreach ( $folderList as $key => $file ) {
                 if ( !isHiddenFile( $file ) ) {
             		$fullName = "{$inFolder}/{$file}";
@@ -28,7 +28,6 @@
                     if ( !is_dir( $fullName ) ) {
 	                    $fileArray[ $file ] = filemtime( $fullName );
 	                }
-                    
              	}
              }
              arsort( $fileArray );
@@ -45,15 +44,13 @@
 			 foreach ( $folderList as $key => $folder ) {
                 if ( !isHiddenFile( $folder ) ) {
                     $fullName = "{$inFolder}/{$folder}";
-                   //  echo "fullname:{$fullName}<br/>";
     		        if ( is_dir( $fullName ) ) {
 	    		       
     				   // Get the time stamp based on youngest contained file. This reflects
     				   // the youngest time stamp of the contained folders/files
     				   $containedTimeStamp = getYoungestFolderTimeCode( $fullName, $inPattern );
-    				   // Use this in the array of folders
-                 // echo "   found file [{$folder}] - " . date( "F d Y, H:i", $containedTimeStamp ) . "\n";
-                  $fileArray[ $folder ] = $containedTimeStamp;
+    				   // Use this in the array of folders keyed by file name
+                       $fileArray[ $folder ] = $containedTimeStamp;
     		        }
                 }
 			 }
@@ -63,14 +60,63 @@
 			 foreach ( $fileArray as $folder => $timeStamp ) {
         		$fullName = "{$inFolder}/{$folder}";
                 $formatedTimeStamp = date( "F d Y, H:i", $timeStamp );
-                echo "<div class=\"folder\" data-folder=\"{$depth}\" data-time=\"{$timeStamp}\">\n";
-                echo "<h{$depth} class=\"folderTitle\">{$folder}</h{$depth}>\n";
-				getFileList( $fullName, $depth + 1, $inPattern );
+                echo "<div class=\"folder\" data-folder=\"{$inDepth}\" data-time=\"{$timeStamp}\">\n";
+                echo "<h{$inDepth} class=\"folderTitle\">{$folder}</h{$inDepth}>\n";
+				displayRecentFilesList( $fullName, $inPattern, $inDepth + 1 );
 		        echo "</div>\n";	
 			 }
 
           }
       }
+      
+   //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+   //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+   /**
+    * Recursive function to display (HTML) a list of files in alpha order.
+    *
+    * @param inFolder the base folder to display folders/files.
+    * @param inPattern the filter for selecting files (defaults to html files).
+    * @param inDepth the depth of search (only used internally).
+    */
+
+ 	  function displayAlphaFilesList( $inFolder, $inPattern = "/\.html$/", $depth = 1 )
+	  {
+	    $dirListing = scandir( $inFolder );
+	
+		if ( isMatchingFileInFolder( $inFolder, $inPattern ) ) {
+			// HTML file in this folder so scan this folder for HTML files and exit
+			echo "<div class=\"list\" data-level=\"{$depth}\">";
+	       	foreach ( $dirListing as $key => $file ) {
+		       	// If file name ends with html then output file name
+                if ( !isHiddenFile( $file ) ) {
+					$fullName = "{$inFolder}/{$file}";
+				    if ( preg_match( $inPattern, $file ) ) {
+		 		      // echo file name
+		 		      $lastModified = date( "F d Y, H:i", filemtime( $fullName ) );
+		 			  echo "<div class=\"item\"><a href=\"{$fullName}\" target=\"_blank\">{$file}</a> <span class=\"date\">{$lastModified}</span> </div>\n";
+		 			}
+	 			}
+			}
+			echo "</div>";
+			return;
+		} else {
+			// No matching files so scan this folder and recurse to next level if folder found
+			foreach ( $dirListing as $key => $folder ) {
+		        if ( !isHiddenFile( $folder ) ) {
+					$fullName = "{$inFolder}/{$folder}";
+			        echo "<div class=\"folder\" data-folder=\"{$depth}\">";
+					if ( is_dir( $fullName ) ) {
+						// output a new heading at this level
+						echo "<h{$depth} class=\"folderTitle\">{$folder}</h{$depth}>\n";
+						// Recurse into this folder
+						displayAlphaFilesList( $fullName, $inPattern, $depth + 1 );
+					}
+					echo "</div>";	
+				}
+			}
+		}
+	  }
+
 
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
    //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -123,7 +169,6 @@
    function getYoungestFolderTimeCode( $inFolder, $inPattern )
    {
       $maxTimeCode = 0;
-      // echo "getYoungestFolderTimeCode( \"{$inFolder}\" )\n";
       $dirListing = scandir( $inFolder );
       // fileListing is now a list of files/folders. We need to check for
       // HTML files stop any further processing
@@ -178,7 +223,6 @@
                if ( $thisTimeCode > $maxTimeCode ) {
                   $maxTimeCode = $thisTimeCode;
                }
-                // echo "   found file [{$file}] - " . date( "F d Y, H:i", $thisTimeCode ) . "\n";
             }
          }
       }
@@ -186,10 +230,8 @@
    }
 
     date_default_timezone_set('Europe/London');
-    // $youngestFileTime = getYoungestFolderTimeCode( "project/", "/\.html$/" );
-    // echo " Youngest file - " . date( "F d Y, H:i", $youngestFileTime ) . "\n\n\n";
-    
-     getFileList( "projects/", 1, "/\.html$/" );
+    // displayRecentFilesList( "projects/" );
+    displayAlphaFilesList( "projects/" );
            
 ?>
 	
