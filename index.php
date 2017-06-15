@@ -93,7 +93,7 @@
 				    if ( preg_match( $inPattern, $file ) ) {
 		 		      // echo file name
 		 		      $lastModified = date( "F d Y, H:i", filemtime( $fullName ) );
-		 			  echo "<div class=\"item\"><a href=\"{$fullName}\" target=\"_blank\">{$value}</a> <span class=\"date\">{$lastModified}</span> </div>\n";
+		 			  echo "<div class=\"item\"><a href=\"{$fullName}\" target=\"_blank\">{$file}</a> <span class=\"date\">{$lastModified}</span> </div>\n";
 		 			}
 	 			}
 			}
@@ -102,7 +102,7 @@
 		} else {
 			// No matching files so scan this folder and recurse to next level if folder found
 			foreach ( $dirListing as $key => $folder ) {
-		        if ( !preg_match("/^\./", $folder ) ) {
+		        if ( !isHiddenFile( $folder ) ) {
 					$fullName = "{$inFolder}/{$folder}";
 			        echo "<div class=\"folder\" data-folder=\"{$depth}\">";
 					if ( is_dir( $fullName ) ) {
@@ -230,7 +230,7 @@
    }
 
     date_default_timezone_set('Europe/London');
-    displayRecentFilesList( "projects/" );
+    // displayRecentFilesList( "projects/" );
     displayAlphaFilesList( "projects/" );
            
 ?>
